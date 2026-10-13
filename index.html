@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8dfe0">
+  <meta name="description" content="A little love letter, opened one fold at a time.">
+  <title>A Letter For You</title>
+
+  <!-- The only external dependency: two readable, romantic Google Fonts. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- Base ---------- */
+    :root {
+      --ink: #593c47;
+      --muted-ink: #896875;
+      --rose: #c97882;
+      --deep-rose: #a95465;
+      --paper: #fffaf1;
+      --paper-shadow: rgba(96, 45, 62, .24);
+      --envelope: #e89aa0;
+      --envelope-light: #f4b9b7;
+      --envelope-dark: #cd737f;
+      --gold: #dcae68;
+      --perspective: 1100px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 280px;
+      overflow-x: hidden;
+      background: #f8dfe0;
+    }
+
+    body {
+      min-height: 100svh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% 8%, rgba(255,255,255,.82), transparent 32%),
+        linear-gradient(145deg, #f9e7e2 0%, #f6d9dc 52%, #eac8d0 100%);
+      font-family: Georgia, serif;
+    }
+
+    button,
+    [role="button"] {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .page {
+      position: relative;
+      display: grid;
+      min-height: 100svh;
+      place-items: center;
+      padding: max(2rem, env(safe-area-inset-top)) 1.15rem max(2.2rem, env(safe-area-inset-bottom));
+      isolation: isolate;
+    }
+
+    .intro {
+      position: absolute;
+      z-index: 2;
+      top: clamp(1.6rem, 7vh, 4.8rem);
+      left: 1rem;
+      right: 1rem;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 .35rem;
+      color: var(--muted-ink);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--deep-rose);
+      font-family: "Great Vibes", cursive;
+      font-size: clamp(2.6rem, 12vw, 4.8rem);
+      font-weight: 400;
+      line-height: .95;
+    }
+
+    .scene {
+      position: relative;
+      width: min(100%, 31rem);
+      min-height: min(75svh, 38rem);
+      perspective: var(--perspective);
+    }
+
+    /* ---------- Floating background details ---------- */
+    .decorations {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .heart,
+    .sparkle {
+      position: absolute;
+      opacity: .56;
+      color: #d9828e;
+      animation: drift 7s ease-in-out infinite;
+    }
+
+    .heart::before {
+      content: "♥";
+      display: block;
+      font-size: var(--size, 1.4rem);
+      transform: rotate(-15deg);
+    }
+
+    .sparkle::before {
+      content: "✦";
+      display: block;
+      color: #dfb47d;
+      font-size: var(--size, 1.1rem);
+    }
+
+    .heart:nth-child(1) { top: 17%; left: 8%; --size: 1.15rem; animation-delay: -1.1s; }
+    .heart:nth-child(2) { top: 29%; right: 8%; --size: .8rem; animation-delay: -4.2s; }
+    .heart:nth-child(3) { bottom: 16%; left: 12%; --size: .95rem; animation-delay: -2.7s; }
+    .heart:nth-child(4) { bottom: 9%; right: 15%; --size: 1.25rem; animation-delay: -5.8s; }
+    .sparkle:nth-child(5) { top: 12%; right: 22%; --size: .9rem; animation-delay: -3.5s; }
+    .sparkle:nth-child(6) { top: 42%; left: 5%; --size: .7rem; animation-delay: -6.4s; }
+    .sparkle:nth-child(7) { bottom: 20%; right: 7%; --size: 1rem; animation-delay: -1.8s; }
+
+    @keyframes drift {
+      0%, 100% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+      50% { transform: translate3d(0, -13px, 0) rotate(8deg); }
+    }
+
+    /* ---------- Envelope ---------- */
+    .envelope-scene {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 5;
+      width: min(82vw, 22rem);
+      transform: translate(-50%, -43%);
+      transition: transform 900ms cubic-bezier(.22, .8, .25, 1), opacity 700ms ease;
+    }
+
+    .envelope-scene.is-closed {
+      animation: envelopeDance 3.7s ease-in-out infinite;
+    }
+
+    .envelope-trigger {
+      position: relative;
+      display: block;
+      width: 100%;
+      aspect-ratio: 1.55 / 1;
+      cursor: pointer;
+      outline: none;
+      filter: drop-shadow(0 1.1rem 1rem rgba(122, 61, 79, .18));
+      transform-style: preserve-3d;
+    }
+
+    .envelope-body,
+    .envelope-flap,
+    .envelope-pocket {
+      position: absolute;
+      inset: 0;
+      border-radius: .42rem;
+    }
+
+    .envelope-body {
+      overflow: hidden;
+      background: linear-gradient(150deg, var(--envelope-light), var(--envelope));
+      box-shadow: inset 0 0 0 1px rgba(142, 67, 83, .12);
+    }
+
+    .envelope-body::before,
+    .envelope-body::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 72%;
+      background: rgba(255, 255, 255, .11);
+      transform-origin: bottom;
+    }
+
+    .envelope-body::before {
+      left: -21%;
+      transform: skewX(36deg);
+    }
+
+    .envelope-body::after {
+      right: -21%;
+      transform: skewX(-36deg);
+    }
+
+    .envelope-flap {
+      z-index: 5;
+      height: 67%;
+      border-radius: .42rem .42rem 0 0;
+      background: linear-gradient(135deg, #f5b8b6, #dc858e);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: 50% 0;
+      backface-visibility: visible;
+      transition: transform 820ms cubic-bezier(.2, .82, .25, 1);
+      transform-style: preserve-3d;
+    }
+
+    .envelope-flap::after {
+      content: "";
+      position: absolute;
+      inset: .14rem .14rem auto;
+      height: calc(100% - .4rem);
+      background: linear-gradient(135deg, rgba(255,255,255,.17), transparent 70%);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+    }
+
+    .envelope-pocket {
+      z-index: 4;
+      background: linear-gradient(35deg, var(--envelope-dark), var(--envelope-light) 52%, #dc858e);
+      clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+    }
+
+    .envelope-pocket::before,
+    .envelope-pocket::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 1px;
+      height: 100%;
+      background: rgba(120, 49, 69, .14);
+    }
+
+    .envelope-pocket::before { left: 25%; transform: rotate(57deg); transform-origin: top; }
+    .envelope-pocket::after { right: 25%; transform: rotate(-57deg); transform-origin: top; }
+
+    .seal {
+      position: absolute;
+      z-index: 6;
+      top: 47%;
+      left: 50%;
+      display: grid;
+      width: 2.25rem;
+      height: 2.25rem;
+      place-items: center;
+      border: 2px solid rgba(255,255,255,.36);
+      border-radius: 50%;
+      color: #fff2ed;
+      background: var(--deep-rose);
+      box-shadow: 0 .25rem .55rem rgba(100, 40, 57, .2);
+      font-size: 1rem;
+      transform: translate(-50%, -50%);
+      transition: opacity 350ms ease;
+    }
+
+    .peek-paper {
+      position: absolute;
+      z-index: 3;
+      top: 7%;
+      left: 9%;
+      width: 82%;
+      height: 64%;
+      padding: .6rem .7rem;
+      overflow: hidden;
+      border: 1px solid rgba(156, 103, 77, .15);
+      border-radius: .15rem;
+      color: #b36e6b;
+      background: linear-gradient(#fffdf7, #faeee0);
+      box-shadow: 0 .25rem .6rem rgba(96, 45, 62, .13);
+      cursor: pointer;
+      opacity: 0;
+      outline: none;
+      pointer-events: none;
+      transform: translateY(35%);
+      transition: transform 650ms cubic-bezier(.22, .8, .25, 1), opacity 400ms ease;
+    }
+
+    .peek-paper::before,
+    .peek-paper::after {
+      content: "";
+      display: block;
+      width: 76%;
+      height: 1px;
+      margin: .35rem auto;
+      background: rgba(197, 128, 122, .25);
+      box-shadow: 0 .45rem rgba(197, 128, 122, .18), 0 .9rem rgba(197, 128, 122, .14);
+    }
+
+    .peek-paper::after {
+      width: 42%;
+      margin-top: 1.25rem;
+    }
+
+    @keyframes envelopeDance {
+      0%, 100% { transform: translate(-50%, -43%) translateY(0) rotate(0deg) scale(1); }
+      20% { transform: translate(-50%, -43%) translateY(-7px) rotate(-1.2deg) scale(1.01); }
+      42% { transform: translate(-50%, -43%) translateY(2px) rotate(1.3deg) scale(.99); }
+      66% { transform: translate(-50%, -43%) translateY(-5px) rotate(-.7deg) scale(1.015); }
+      82% { transform: translate(-50%, -43%) translateY(1px) rotate(.6deg) scale(1); }
+    }
+
+    /* ---------- Folded letter ---------- */
+    .letter-paper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 8;
+      width: min(86vw, 23rem);
+      height: min(76svh, 38rem);
+      max-height: 39rem;
+      perspective: var(--perspective);
+      transform: translate(-50%, -24%) scale(.74);
+      transform-style: preserve-3d;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 850ms cubic-bezier(.2, .82, .25, 1), opacity 500ms ease;
+    }
+
+    .paper-panel {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 33.333%;
+      padding: clamp(1rem, 4vw, 1.55rem);
+      overflow: hidden;
+      border: 1px solid rgba(156, 103, 77, .18);
+      color: #5c4146;
+      background: var(--paper);
+      box-shadow: 0 .65rem 1rem var(--paper-shadow);
+      transform-style: preserve-3d;
+      backface-visibility: visible;
+      transition: transform 950ms cubic-bezier(.2, .84, .2, 1), top 950ms cubic-bezier(.2, .84, .2, 1);
+    }
+
+    .paper-panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: .22;
+      background: repeating-linear-gradient(0deg, transparent 0 1.35rem, rgba(197, 128, 122, .15) 1.4rem 1.45rem);
+    }
+
+    .paper-top {
+      top: 0;
+      z-index: 3;
+      transform-origin: 50% 100%;
+      transform: rotateX(180deg);
+    }
+
+    .paper-middle {
+      top: 33.333%;
+      z-index: 1;
+      overflow: auto;
+    }
+
+    .letter-copy {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      padding: clamp(1rem, 4vw, 1.55rem);
+      overflow: auto;
+      border: 1px solid rgba(156, 103, 77, .18);
+      color: #5c4146;
+      background: var(--paper);
+      box-shadow: 0 .65rem 1rem var(--paper-shadow);
+      opacity: 0;
+      pointer-events: none;
+      -webkit-overflow-scrolling: touch;
+      transition: opacity 450ms ease;
+    }
+
+    .letter-copy::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      opacity: .22;
+      background: repeating-linear-gradient(0deg, transparent 0 1.35rem, rgba(197, 128, 122, .15) 1.4rem 1.45rem);
+      pointer-events: none;
+    }
+
+    .paper-bottom {
+      top: 66.666%;
+      z-index: 2;
+      transform-origin: 50% 0;
+      transform: rotateX(180deg);
+    }
+
+    .paper-panel p,
+    .letter-copy p {
+      margin: 0 0 .7rem;
+      font-family: "Dancing Script", cursive;
+      font-size: clamp(1.22rem, 5.1vw, 1.55rem);
+      line-height: 1.25;
+    }
+
+    .paper-panel p:last-child,
+    .letter-copy p:last-child {
+      margin-bottom: 0;
+    }
+
+    .paper-top p,
+    .paper-bottom p {
+      opacity: .8;
+      font-size: clamp(1.1rem, 4.6vw, 1.35rem);
+    }
+
+    .paper-top p:first-child {
+      margin-top: .15rem;
+    }
+
+    .letter-heading {
+      margin: .05rem 0 .8rem;
+      color: var(--deep-rose);
+      font-family: "Great Vibes", cursive;
+      font-size: clamp(1.85rem, 8vw, 2.55rem);
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .letter-signoff {
+      margin-top: 1rem !important;
+      color: var(--deep-rose);
+    }
+
+    .letter-signature {
+      display: block;
+      margin-top: .05rem;
+      color: var(--deep-rose);
+      font-family: "Great Vibes", cursive;
+      font-size: 2.25rem;
+      line-height: 1;
+    }
+
+    /* ---------- State-driven interaction ---------- */
+    body[data-state="flap-open"] .envelope-flap,
+    body[data-state="paper-out"] .envelope-flap,
+    body[data-state="bottom-open"] .envelope-flap,
+    body[data-state="letter-open"] .envelope-flap {
+      transform: rotateX(180deg);
+    }
+
+    body[data-state="flap-open"] .peek-paper {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(-29%);
+    }
+
+    body[data-state="flap-open"] .seal {
+      opacity: 0;
+    }
+
+    body[data-state="paper-out"] .envelope-scene,
+    body[data-state="bottom-open"] .envelope-scene,
+    body[data-state="letter-open"] .envelope-scene {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 14%) scale(.84);
+    }
+
+    body[data-state="paper-out"] .letter-paper,
+    body[data-state="bottom-open"] .letter-paper,
+    body[data-state="letter-open"] .letter-paper {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -46%) scale(1);
+    }
+
+    body[data-state="bottom-open"] .paper-bottom,
+    body[data-state="letter-open"] .paper-bottom {
+      transform: rotateX(0deg);
+    }
+
+    body[data-state="letter-open"] .paper-top {
+      transform: rotateX(0deg);
+    }
+
+    body[data-state="letter-open"] .letter-copy {
+      z-index: 4;
+      opacity: 1;
+      pointer-events: auto;
+      transition-delay: 900ms;
+    }
+
+    body[data-state="letter-open"] .paper-middle {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tap-hint {
+      position: absolute;
+      bottom: clamp(3.4rem, 9vh, 5rem);
+      left: 50%;
+      color: var(--muted-ink);
+      font-size: .74rem;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+      transform: translateX(-50%);
+      transition: opacity 450ms ease, transform 450ms ease;
+      white-space: nowrap;
+    }
+
+    .tap-hint::before {
+      content: "♡";
+      display: inline-block;
+      margin-right: .45rem;
+      color: var(--rose);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: .7; }
+      50% { transform: scale(1.35); opacity: 1; }
+    }
+
+    body:not([data-state="closed"]) .tap-hint {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+    }
+
+    .read-again {
+      position: absolute;
+      bottom: max(1.45rem, env(safe-area-inset-bottom));
+      left: 50%;
+      z-index: 12;
+      padding: .68rem 1.1rem;
+      border: 1px solid rgba(169, 84, 101, .34);
+      border-radius: 999px;
+      color: var(--deep-rose);
+      background: rgba(255,255,255,.37);
+      box-shadow: 0 .35rem .8rem rgba(122, 61, 79, .08);
+      cursor: pointer;
+      font: 600 .78rem Georgia, serif;
+      letter-spacing: .08em;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 10px);
+      transition: opacity 450ms ease, transform 450ms ease, background 200ms ease;
+    }
+
+    .read-again:active,
+    .read-again:focus-visible {
+      background: rgba(255,255,255,.76);
+    }
+
+    body[data-state="letter-open"] .read-again {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, 0);
+    }
+
+    .envelope-trigger:focus-visible,
+    .peek-paper:focus-visible,
+    .letter-paper:focus-visible,
+    .read-again:focus-visible {
+      outline: 3px solid rgba(169, 84, 101, .58);
+      outline-offset: 5px;
+    }
+
+    @media (min-width: 600px) {
+      .scene { min-height: min(77svh, 44rem); }
+      .envelope-scene { width: min(58vw, 25rem); }
+      .letter-paper { width: min(62vw, 28rem); }
+      .paper-panel p { font-size: 1.45rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body data-state="closed">
+  <main class="page">
+    <div class="decorations" aria-hidden="true">
+      <span class="heart"></span>
+      <span class="heart"></span>
+      <span class="heart"></span>
+      <span class="heart"></span>
+      <span class="sparkle"></span>
+      <span class="sparkle"></span>
+      <span class="sparkle"></span>
+    </div>
+
+    <header class="intro">
+      <p class="eyebrow">A little something for you</p>
+      <h1>Open my heart</h1>
+    </header>
+
+    <section class="scene" aria-label="Interactive love letter">
+      <!-- Step 1: this envelope dances until it is activated. -->
+      <div class="envelope-scene is-closed" id="envelopeScene">
+        <div class="envelope-trigger" id="envelopeTrigger" role="button" tabindex="0" aria-label="Open the envelope">
+          <div class="peek-paper" id="peekPaper" role="button" tabindex="-1" aria-label="Pull out the letter">
+            <span aria-hidden="true">With all my heart</span>
+          </div>
+          <div class="envelope-body" aria-hidden="true"></div>
+          <div class="envelope-flap" aria-hidden="true"></div>
+          <div class="envelope-pocket" aria-hidden="true"></div>
+          <div class="seal" aria-hidden="true">♥</div>
+        </div>
+      </div>
+
+      <!-- Steps 3 and 4: the two 3D folds open one at a time. -->
+      <div class="letter-paper" id="letterPaper" role="button" tabindex="-1" aria-label="Open the folded letter">
+        <article class="paper-panel paper-top" aria-hidden="true">
+          <p>For the person who makes every ordinary day feel a little more beautiful.</p>
+        </article>
+
+        <article class="paper-panel paper-middle" aria-hidden="true"></article>
+
+        <article class="paper-panel paper-bottom" aria-hidden="true">
+          <p>One year, every lesson, and all the love still ahead of us.</p>
+        </article>
+
+        <!-- The copy sits underneath the three folds and is revealed at the end. -->
+        <article class="letter-copy">
+          <h2 class="letter-heading">Dear <span data-placeholder="recipient">Sai</span>,</h2>
+
+          <p>I am grateful to be your boyfriend for a year, we had so many ups and downs together. I realized that our pacing is fast and we became comfortable to one another in a short amount of time. I don't regret how fast it was because I love you throughout the journey. I want to keep on going with you, but I want to remove the downs that we are having.</p>
+
+          <p>I'm sorry because I want to meet each other halfway. This night, I figured that what if balance is a toxic thing to have when it comes to fight. Then I would rather become unbalanced so that I can meet the comfort you're asking. Being unbalanced is not a bad thing once in a while. No matter how painful the problem is, even if we don't know who's at fault, I wish myself to be always giving and less prideful.</p>
+
+          <p>Pride is something that became a trait that I didn't even notice that I have. I don't care where it came from, but it helped me during the days I was still alone. But now that I'm with you, maybe it's better to throw away a toxic trait that is not suited for our relationship. I know it will take time, but I want this away from you and us.</p>
+
+          <p>I, <span data-placeholder="sender">Kyle Israel G. Concepcion</span>, swear to you on everything we built together for a year that I will throw away my pride and accept any consequence for releasing it uncontrollably and unwanted in our relationship.</p>
+
+          <p class="letter-signoff">I love you always,<span class="letter-signature" data-placeholder="signature">Kai</span></p>
+        </article>
+      </div>
+    </section>
+
+    <p class="tap-hint" aria-live="polite">Tap to open</p>
+    <button class="read-again" id="readAgain" type="button">Read again</button>
+  </main>
+
+  <script>
+    /* ---------- Easy-to-edit names ---------- */
+    const letterConfig = {
+      recipientName: "Name",
+      senderName: "My name",
+      signature: "Name"
+    };
+
+    document.querySelector('[data-placeholder="recipient"]').textContent = letterConfig.recipientName;
+    document.querySelector('[data-placeholder="sender"]').textContent = letterConfig.senderName;
+    document.querySelector('[data-placeholder="signature"]').textContent = letterConfig.signature;
+
+    /* ---------- Small state machine ----------
+       closed -> flap-open -> paper-out -> bottom-open -> letter-open
+    */
+    const states = Object.freeze({
+      CLOSED: "closed",
+      FLAP_OPEN: "flap-open",
+      PAPER_OUT: "paper-out",
+      BOTTOM_OPEN: "bottom-open",
+      LETTER_OPEN: "letter-open"
+    });
+
+    const body = document.body;
+    const envelopeScene = document.getElementById("envelopeScene");
+    const envelopeTrigger = document.getElementById("envelopeTrigger");
+    const peekPaper = document.getElementById("peekPaper");
+    const letterPaper = document.getElementById("letterPaper");
+    const letterCopy = document.querySelector(".letter-copy");
+    const readAgain = document.getElementById("readAgain");
+    let currentState = states.CLOSED;
+    let transitionTimer = null;
+    let isTransitioning = false;
+
+    const transitionDurations = {
+      [states.FLAP_OPEN]: 860,
+      [states.PAPER_OUT]: 760,
+      [states.BOTTOM_OPEN]: 900,
+      [states.LETTER_OPEN]: 980
+    };
+
+    function updateAccessibility() {
+      envelopeTrigger.tabIndex = currentState === states.CLOSED ? 0 : -1;
+      peekPaper.tabIndex = currentState === states.FLAP_OPEN ? 0 : -1;
+      letterPaper.tabIndex = [states.PAPER_OUT, states.BOTTOM_OPEN].includes(currentState) ? 0 : -1;
+
+      envelopeTrigger.setAttribute("aria-label", currentState === states.CLOSED ? "Open the envelope" : "Envelope opened");
+      peekPaper.setAttribute("aria-label", currentState === states.FLAP_OPEN ? "Pull out the letter" : "Letter removed");
+      letterPaper.setAttribute("aria-label", currentState === states.PAPER_OUT ? "Open the bottom fold" : "Open the top fold");
+    }
+
+    function setState(nextState, lockFor = 0) {
+      currentState = nextState;
+      body.dataset.state = nextState;
+      envelopeScene.classList.toggle("is-closed", nextState === states.CLOSED);
+      updateAccessibility();
+
+      isTransitioning = lockFor > 0;
+      window.clearTimeout(transitionTimer);
+      if (isTransitioning) {
+        transitionTimer = window.setTimeout(() => {
+          isTransitioning = false;
+        }, lockFor);
+      }
+    }
+
+    function advance() {
+      if (isTransitioning) return;
+
+      if (currentState === states.CLOSED) {
+        setState(states.FLAP_OPEN, transitionDurations[states.FLAP_OPEN]);
+      } else if (currentState === states.FLAP_OPEN) {
+        setState(states.PAPER_OUT, transitionDurations[states.PAPER_OUT]);
+      } else if (currentState === states.PAPER_OUT) {
+        setState(states.BOTTOM_OPEN, transitionDurations[states.BOTTOM_OPEN]);
+      } else if (currentState === states.BOTTOM_OPEN) {
+        setState(states.LETTER_OPEN, transitionDurations[states.LETTER_OPEN]);
+      }
+    }
+
+    function resetLetter() {
+      window.clearTimeout(transitionTimer);
+      isTransitioning = false;
+      letterCopy.scrollTop = 0;
+      setState(states.CLOSED);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* Pointer interaction works on touch, mouse, and pen. */
+    envelopeTrigger.addEventListener("pointerdown", (event) => {
+      if (event.target.closest(".peek-paper")) return;
+      advance();
+    });
+
+    peekPaper.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+      advance();
+    });
+
+    letterPaper.addEventListener("pointerdown", advance);
+
+    /* Keyboard support: Enter and Space perform the same step as a tap. */
+    [envelopeTrigger, peekPaper, letterPaper].forEach((control) => {
+      control.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          advance();
+        }
+      });
+    });
+
+    readAgain.addEventListener("click", resetLetter);
+
+    updateAccessibility();
+  </script>
+</body>
+</html>
